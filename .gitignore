@@ -1,0 +1,28 @@
+# Rust
+/wasm_lib/target
+/wasm_lib/pkg
+/wasm_lib/Cargo.lock
+
+# Node
+/demo_site/node_modules
+/demo_site/dist
+/demo_site/.angular
+/demo_site/npm-debug.log
+/demo_site/yarn-error.log
+
+# IDEs
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build outputs
+*.wasm
+pkg/

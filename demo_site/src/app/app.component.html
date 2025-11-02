@@ -1,0 +1,576 @@
+<div class="app-container">
+  <!-- TOOLBAR HEADER -->
+  <mat-toolbar color="primary" class="app-toolbar">
+    <div class="toolbar-content">
+      <div class="toolbar-title">
+        <div class="toolbar-title-row">
+          <mat-icon class="toolbar-icon">flash_on</mat-icon>
+          <h1>WebAssembly Performance Suite</h1>
+        </div>
+        <p class="toolbar-subtitle">Real-World CPU-Intensive Applications Comparison</p>
+      </div>
+      <div class="toolbar-status" *ngIf="isLoading">
+        <mat-spinner diameter="30"></mat-spinner>
+        <span>Running benchmark...</span>
+      </div>
+    </div>
+  </mat-toolbar>
+
+  <!-- MAIN CONTENT -->
+  <div class="main-content">
+    <!-- MATERIAL TABS -->
+    <mat-tab-group 
+      [(selectedIndex)]="activeTab"
+      class="material-tabs"
+      animationDuration="300">
+
+      <!-- TAB 0: CRYPTOGRAPHY -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="tab-icon">security</mat-icon>
+          <span class="tab-label">Cryptography</span>
+        </ng-template>
+
+        <div class="tab-content-wrapper">
+          <div class="tab-header">
+            <div class="tab-header-title">
+              <mat-icon class="header-icon">security</mat-icon>
+              <h2>Cryptography - Blockchain & Cryptocurrency</h2>
+            </div>
+            <p>Cryptographic operations require intensive bitwise manipulations and hashing. These are perfect examples of where WASM excels.</p>
+          </div>
+
+          <mat-card class="benchmark-card">
+            <mat-card-header>
+              <mat-card-title>
+                <mat-icon class="card-icon">lock</mat-icon>
+                Cryptographic Hashing
+              </mat-card-title>
+              <mat-card-subtitle>10 million hash iterations using bitwise operations</mat-card-subtitle>
+            </mat-card-header>
+
+            <mat-card-content>
+              <p class="benchmark-description">
+                Performs 10 million iterations of cryptographic hash computation using XOR, bit shifts, and multiplications. 
+                This is a pure CPU-intensive operation where WASM's compiled code provides significant advantages.
+              </p>
+
+              <div class="benchmark-actions">
+                <button mat-raised-button color="accent" (click)="runBenchmarkJS('hash')" [disabled]="isLoading">
+                  <mat-icon>code</mat-icon>
+                  JavaScript
+                </button>
+                <button mat-raised-button color="primary" (click)="runBenchmarkWASM('hash')" [disabled]="isLoading">
+                  <mat-icon>flash_on</mat-icon>
+                  WebAssembly
+                </button>
+              </div>
+
+              <mat-divider class="my-4"></mat-divider>
+
+              <div class="use-cases">
+                <h4>Real-World Applications:</h4>
+                <ul>
+                  <li>Bitcoin mining and cryptocurrency validation</li>
+                  <li>Password hashing and verification</li>
+                  <li>Blockchain transaction validation</li>
+                  <li>Data integrity verification</li>
+                </ul>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- RESULTS -->
+          <mat-card *ngIf="lastJsBenchmarkTime || lastWasmBenchmarkTime" class="results-card">
+            <mat-card-header>
+              <mat-card-title>
+                <mat-icon class="card-icon">assessment</mat-icon>
+                Results
+              </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="results-grid">
+                <div *ngIf="lastJsBenchmarkTime" class="result-item js-result">
+                  <mat-icon class="result-icon">schedule</mat-icon>
+                  <div class="result-label">JavaScript</div>
+                  <div class="result-value">{{lastJsBenchmarkTime}}ms</div>
+                </div>
+                <div *ngIf="lastWasmBenchmarkTime" class="result-item wasm-result">
+                  <mat-icon class="result-icon">flash_on</mat-icon>
+                  <div class="result-label">WebAssembly</div>
+                  <div class="result-value">{{lastWasmBenchmarkTime}}ms</div>
+                </div>
+              </div>
+              <div *ngIf="benchmarkResult" class="result-output">
+                <strong>Output:</strong> <code>{{benchmarkResult}}</code>
+              </div>
+              <div *ngIf="getBenchmarkSpeedup()" class="speedup-badge">
+                <mat-icon class="speedup-icon">trending_up</mat-icon>
+                WASM is <strong>{{getBenchmarkSpeedup()}}x</strong> faster!
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+
+      <!-- TAB 1: SCIENTIFIC COMPUTING -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="tab-icon">calculate</mat-icon>
+          <span class="tab-label">Scientific Computing</span>
+        </ng-template>
+
+        <div class="tab-content-wrapper">
+          <div class="tab-header">
+            <div class="tab-header-title">
+              <mat-icon class="header-icon">calculate</mat-icon>
+              <h2>Scientific Computing & Simulations</h2>
+            </div>
+            <p>Complex mathematical operations like matrix calculations and Monte Carlo simulations are computation-heavy tasks perfect for WASM.</p>
+          </div>
+
+          <div class="benchmark-grid">
+            <!-- Matrix Multiplication -->
+            <mat-card class="benchmark-card">
+              <mat-card-header>
+                <mat-card-title>
+                  <mat-icon class="card-icon">grid_on</mat-icon>
+                  Matrix Multiplication
+                </mat-card-title>
+                <mat-card-subtitle>300×300 matrix multiply (27M operations)</mat-card-subtitle>
+              </mat-card-header>
+              <mat-card-content>
+                <p>Linear algebra operations are fundamental to machine learning, graphics, and physics simulations.</p>
+                <div class="benchmark-actions">
+                  <button mat-stroked-button color="accent" (click)="runBenchmarkJS('matrix')" [disabled]="isLoading">JS</button>
+                  <button mat-stroked-button color="primary" (click)="runBenchmarkWASM('matrix')" [disabled]="isLoading">WASM</button>
+                </div>
+                <div class="use-cases-small">
+                  <strong>Use:</strong> ML inference, 3D graphics, Physics
+                </div>
+              </mat-card-content>
+            </mat-card>
+
+            <!-- Monte Carlo Pi -->
+            <mat-card class="benchmark-card">
+              <mat-card-header>
+                <mat-card-title>
+                  <mat-icon class="card-icon">pie_chart</mat-icon>
+                  Monte Carlo Pi
+                </mat-card-title>
+                <mat-card-subtitle>Estimate π using 10M samples</mat-card-subtitle>
+              </mat-card-header>
+              <mat-card-content>
+                <p>Statistical simulation combining random number generation with floating-point math.</p>
+                <div class="benchmark-actions">
+                  <button mat-stroked-button color="accent" (click)="runBenchmarkJS('pi')" [disabled]="isLoading">JS</button>
+                  <button mat-stroked-button color="primary" (click)="runBenchmarkWASM('pi')" [disabled]="isLoading">WASM</button>
+                </div>
+                <div class="use-cases-small">
+                  <strong>Use:</strong> Financial modeling, Simulations
+                </div>
+              </mat-card-content>
+            </mat-card>
+
+            <!-- Prime Numbers -->
+            <mat-card class="benchmark-card">
+              <mat-card-header>
+                <mat-card-title>
+                  <mat-icon class="card-icon">filter_list</mat-icon>
+                  Prime Numbers
+                </mat-card-title>
+                <mat-card-subtitle>Find all primes up to 100,000</mat-card-subtitle>
+              </mat-card-header>
+              <mat-card-content>
+                <p>CPU-intensive integer operations with complex branching patterns.</p>
+                <div class="benchmark-actions">
+                  <button mat-stroked-button color="accent" (click)="runBenchmarkJS('primes')" [disabled]="isLoading">JS</button>
+                  <button mat-stroked-button color="primary" (click)="runBenchmarkWASM('primes')" [disabled]="isLoading">WASM</button>
+                </div>
+                <div class="use-cases-small">
+                  <strong>Use:</strong> Cryptography, Number theory
+                </div>
+              </mat-card-content>
+            </mat-card>
+          </div>
+
+          <!-- RESULTS -->
+          <mat-card *ngIf="lastJsBenchmarkTime || lastWasmBenchmarkTime" class="results-card">
+            <mat-card-header>
+              <mat-card-title>
+                <mat-icon class="card-icon">assessment</mat-icon>
+                Results
+              </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="results-grid">
+                <div *ngIf="lastJsBenchmarkTime" class="result-item js-result">
+                  <mat-icon class="result-icon">schedule</mat-icon>
+                  <div class="result-label">JavaScript</div>
+                  <div class="result-value">{{lastJsBenchmarkTime}}ms</div>
+                </div>
+                <div *ngIf="lastWasmBenchmarkTime" class="result-item wasm-result">
+                  <mat-icon class="result-icon">flash_on</mat-icon>
+                  <div class="result-label">WebAssembly</div>
+                  <div class="result-value">{{lastWasmBenchmarkTime}}ms</div>
+                </div>
+              </div>
+              <div *ngIf="benchmarkResult" class="result-output">
+                <strong>Output:</strong> <code>{{benchmarkResult}}</code>
+              </div>
+              <div *ngIf="getBenchmarkSpeedup()" class="speedup-badge">
+                <mat-icon class="speedup-icon">trending_up</mat-icon>
+                WASM is <strong>{{getBenchmarkSpeedup()}}x</strong> faster!
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+
+      <!-- TAB 2: 3D GRAPHICS & GAMING -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="tab-icon">videogame_asset</mat-icon>
+          <span class="tab-label">3D Graphics & Gaming</span>
+        </ng-template>
+
+        <div class="tab-content-wrapper">
+          <div class="tab-header">
+            <div class="tab-header-title">
+              <mat-icon class="header-icon">videogame_asset</mat-icon>
+              <h2>3D Graphics & Gaming</h2>
+            </div>
+            <p>Real-time 3D games require constant complex math for physics, rendering, and collision detection. WASM provides near-native performance.</p>
+          </div>
+
+          <mat-card class="info-card">
+            <mat-card-header>
+              <mat-card-title>
+                <mat-icon class="card-icon">construction</mat-icon>
+                Three.js 3D Demo Coming Soon
+              </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <p>We're adding a real-time 3D physics simulation using Three.js to demonstrate WASM's power in game engines.</p>
+              
+              <h4>Planned Features:</h4>
+              <ul class="feature-list">
+                <li><mat-icon class="feature-icon">check_circle</mat-icon> Real-time physics calculations (gravity, collisions)</li>
+                <li><mat-icon class="feature-icon">check_circle</mat-icon> Particle systems with thousands of objects</li>
+                <li><mat-icon class="feature-icon">check_circle</mat-icon> Complex geometry transformations</li>
+                <li><mat-icon class="feature-icon">check_circle</mat-icon> Side-by-side JS vs WASM comparison</li>
+              </ul>
+
+              <mat-divider class="my-4"></mat-divider>
+
+              <div class="tech-insight">
+                <h4>
+                  <mat-icon class="insight-icon">lightbulb</mat-icon>
+                  Why WASM Dominates in Gaming:
+                </h4>
+                <p>
+                  Game engines need to recalculate physics, animations, and rendering 60+ times per second. 
+                  WASM's predictable performance and lack of garbage collection pauses make it ideal for maintaining 
+                  smooth 60fps gameplay.
+                </p>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+
+      <!-- TAB 3: DATA PROCESSING -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="tab-icon">analytics</mat-icon>
+          <span class="tab-label">Data Processing</span>
+        </ng-template>
+
+        <div class="tab-content-wrapper">
+          <div class="tab-header">
+            <div class="tab-header-title">
+              <mat-icon class="header-icon">analytics</mat-icon>
+              <h2>Data Processing & Analysis</h2>
+            </div>
+            <p>Large-scale data operations like sorting and text processing benefit from WASM's efficient algorithm execution.</p>
+          </div>
+
+          <div class="benchmark-grid">
+            <!-- Array Sorting -->
+            <mat-card class="benchmark-card">
+              <mat-card-header>
+                <mat-card-title>
+                  <mat-icon class="card-icon">sort</mat-icon>
+                  Array Sorting
+                </mat-card-title>
+                <mat-card-subtitle>Sort 1 million random integers</mat-card-subtitle>
+              </mat-card-header>
+              <mat-card-content>
+                <p>Algorithm performance test using optimized sorting algorithms.</p>
+                <div class="benchmark-actions">
+                  <button mat-stroked-button color="accent" (click)="runBenchmarkJS('sort')" [disabled]="isLoading">JS</button>
+                  <button mat-stroked-button color="primary" (click)="runBenchmarkWASM('sort')" [disabled]="isLoading">WASM</button>
+                </div>
+                <div class="use-cases-small">
+                  <strong>Use:</strong> Database operations, Data analysis
+                </div>
+              </mat-card-content>
+            </mat-card>
+
+            <!-- Text Processing -->
+            <mat-card class="benchmark-card">
+              <mat-card-header>
+                <mat-card-title>
+                  <mat-icon class="card-icon">text_fields</mat-icon>
+                  Text Processing
+                </mat-card-title>
+                <mat-card-subtitle>Process & transform 10K iterations</mat-card-subtitle>
+              </mat-card-header>
+              <mat-card-content>
+                <p>String manipulation and character-level operations.</p>
+                <div class="benchmark-actions">
+                  <button mat-stroked-button color="accent" (click)="runBenchmarkJS('text')" [disabled]="isLoading">JS</button>
+                  <button mat-stroked-button color="primary" (click)="runBenchmarkWASM('text')" [disabled]="isLoading">WASM</button>
+                </div>
+                <div class="use-cases-small">
+                  <strong>Use:</strong> NLP, Text analysis
+                </div>
+              </mat-card-content>
+            </mat-card>
+
+            <!-- Fibonacci -->
+            <mat-card class="benchmark-card">
+              <mat-card-header>
+                <mat-card-title>
+                  <mat-icon class="card-icon">functions</mat-icon>
+                  Fibonacci
+                </mat-card-title>
+                <mat-card-subtitle>Calculate 1000 Fibonacci numbers</mat-card-subtitle>
+              </mat-card-header>
+              <mat-card-content>
+                <p>Sequential arithmetic operations demonstrating basic performance.</p>
+                <div class="benchmark-actions">
+                  <button mat-stroked-button color="accent" (click)="runBenchmarkJS('fibonacci')" [disabled]="isLoading">JS</button>
+                  <button mat-stroked-button color="primary" (click)="runBenchmarkWASM('fibonacci')" [disabled]="isLoading">WASM</button>
+                </div>
+                <div class="use-cases-small">
+                  <strong>Use:</strong> Algorithm testing
+                </div>
+              </mat-card-content>
+            </mat-card>
+          </div>
+
+          <!-- RESULTS -->
+          <mat-card *ngIf="lastJsBenchmarkTime || lastWasmBenchmarkTime" class="results-card">
+            <mat-card-header>
+              <mat-card-title>
+                <mat-icon class="card-icon">assessment</mat-icon>
+                Results
+              </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="results-grid">
+                <div *ngIf="lastJsBenchmarkTime" class="result-item js-result">
+                  <mat-icon class="result-icon">schedule</mat-icon>
+                  <div class="result-label">JavaScript</div>
+                  <div class="result-value">{{lastJsBenchmarkTime}}ms</div>
+                </div>
+                <div *ngIf="lastWasmBenchmarkTime" class="result-item wasm-result">
+                  <mat-icon class="result-icon">flash_on</mat-icon>
+                  <div class="result-label">WebAssembly</div>
+                  <div class="result-value">{{lastWasmBenchmarkTime}}ms</div>
+                </div>
+              </div>
+              <div *ngIf="benchmarkResult" class="result-output">
+                <strong>Output:</strong> <code>{{benchmarkResult}}</code>
+              </div>
+              <div *ngIf="getBenchmarkSpeedup()" class="speedup-badge">
+                <mat-icon class="speedup-icon">trending_up</mat-icon>
+                WASM is <strong>{{getBenchmarkSpeedup()}}x</strong> faster!
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+
+      <!-- TAB 4: ALL BENCHMARKS -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="tab-icon">speed</mat-icon>
+          <span class="tab-label">All Benchmarks</span>
+        </ng-template>
+
+        <div class="tab-content-wrapper">
+          <div class="tab-header">
+            <div class="tab-header-title">
+              <mat-icon class="header-icon">speed</mat-icon>
+              <h2>Complete Benchmark Suite</h2>
+            </div>
+            <p>Run all computational benchmarks and see the full performance picture across different domains.</p>
+          </div>
+
+          <div class="all-benchmarks-grid">
+            <mat-card class="benchmark-card">
+              <mat-card-header>
+                <mat-card-title>
+                  <mat-icon class="card-icon">lock</mat-icon>
+                  Crypto Hash
+                </mat-card-title>
+                <mat-card-subtitle>10M hash iterations</mat-card-subtitle>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="benchmark-actions">
+                  <button mat-stroked-button color="accent" (click)="runBenchmarkJS('hash')" [disabled]="isLoading">JS</button>
+                  <button mat-stroked-button color="primary" (click)="runBenchmarkWASM('hash')" [disabled]="isLoading">WASM</button>
+                </div>
+              </mat-card-content>
+            </mat-card>
+
+            <mat-card class="benchmark-card">
+              <mat-card-header>
+                <mat-card-title>
+                  <mat-icon class="card-icon">grid_on</mat-icon>
+                  Matrix Multiply
+                </mat-card-title>
+                <mat-card-subtitle>300×300 matrix multiplication</mat-card-subtitle>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="benchmark-actions">
+                  <button mat-stroked-button color="accent" (click)="runBenchmarkJS('matrix')" [disabled]="isLoading">JS</button>
+                  <button mat-stroked-button color="primary" (click)="runBenchmarkWASM('matrix')" [disabled]="isLoading">WASM</button>
+                </div>
+              </mat-card-content>
+            </mat-card>
+
+            <mat-card class="benchmark-card">
+              <mat-card-header>
+                <mat-card-title>
+                  <mat-icon class="card-icon">pie_chart</mat-icon>
+                  Monte Carlo Pi
+                </mat-card-title>
+                <mat-card-subtitle>Estimate π with 10M samples</mat-card-subtitle>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="benchmark-actions">
+                  <button mat-stroked-button color="accent" (click)="runBenchmarkJS('pi')" [disabled]="isLoading">JS</button>
+                  <button mat-stroked-button color="primary" (click)="runBenchmarkWASM('pi')" [disabled]="isLoading">WASM</button>
+                </div>
+              </mat-card-content>
+            </mat-card>
+
+            <mat-card class="benchmark-card">
+              <mat-card-header>
+                <mat-card-title>
+                  <mat-icon class="card-icon">filter_list</mat-icon>
+                  Prime Numbers
+                </mat-card-title>
+                <mat-card-subtitle>Find primes up to 100K</mat-card-subtitle>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="benchmark-actions">
+                  <button mat-stroked-button color="accent" (click)="runBenchmarkJS('primes')" [disabled]="isLoading">JS</button>
+                  <button mat-stroked-button color="primary" (click)="runBenchmarkWASM('primes')" [disabled]="isLoading">WASM</button>
+                </div>
+              </mat-card-content>
+            </mat-card>
+
+            <mat-card class="benchmark-card">
+              <mat-card-header>
+                <mat-card-title>
+                  <mat-icon class="card-icon">sort</mat-icon>
+                  Array Sort
+                </mat-card-title>
+                <mat-card-subtitle>Sort 1M integers</mat-card-subtitle>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="benchmark-actions">
+                  <button mat-stroked-button color="accent" (click)="runBenchmarkJS('sort')" [disabled]="isLoading">JS</button>
+                  <button mat-stroked-button color="primary" (click)="runBenchmarkWASM('sort')" [disabled]="isLoading">WASM</button>
+                </div>
+              </mat-card-content>
+            </mat-card>
+
+            <mat-card class="benchmark-card">
+              <mat-card-header>
+                <mat-card-title>
+                  <mat-icon class="card-icon">text_fields</mat-icon>
+                  Text Process
+                </mat-card-title>
+                <mat-card-subtitle>Process 10K iterations</mat-card-subtitle>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="benchmark-actions">
+                  <button mat-stroked-button color="accent" (click)="runBenchmarkJS('text')" [disabled]="isLoading">JS</button>
+                  <button mat-stroked-button color="primary" (click)="runBenchmarkWASM('text')" [disabled]="isLoading">WASM</button>
+                </div>
+              </mat-card-content>
+            </mat-card>
+
+            <mat-card class="benchmark-card">
+              <mat-card-header>
+                <mat-card-title>
+                  <mat-icon class="card-icon">functions</mat-icon>
+                  Fibonacci
+                </mat-card-title>
+                <mat-card-subtitle>Calculate 1000 Fibonacci numbers</mat-card-subtitle>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="benchmark-actions">
+                  <button mat-stroked-button color="accent" (click)="runBenchmarkJS('fibonacci')" [disabled]="isLoading">JS</button>
+                  <button mat-stroked-button color="primary" (click)="runBenchmarkWASM('fibonacci')" [disabled]="isLoading">WASM</button>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          </div>
+
+          <!-- RESULTS -->
+          <mat-card *ngIf="lastJsBenchmarkTime || lastWasmBenchmarkTime" class="results-card">
+            <mat-card-header>
+              <mat-card-title>
+                <mat-icon class="card-icon">assessment</mat-icon>
+                Latest Result
+              </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="results-grid">
+                <div *ngIf="lastJsBenchmarkTime" class="result-item js-result">
+                  <mat-icon class="result-icon">schedule</mat-icon>
+                  <div class="result-label">JavaScript</div>
+                  <div class="result-value">{{lastJsBenchmarkTime}}ms</div>
+                </div>
+                <div *ngIf="lastWasmBenchmarkTime" class="result-item wasm-result">
+                  <mat-icon class="result-icon">flash_on</mat-icon>
+                  <div class="result-label">WebAssembly</div>
+                  <div class="result-value">{{lastWasmBenchmarkTime}}ms</div>
+                </div>
+              </div>
+              <div *ngIf="benchmarkResult" class="result-output">
+                <strong>Output:</strong> <code>{{benchmarkResult}}</code>
+              </div>
+              <div *ngIf="getBenchmarkSpeedup()" class="speedup-badge">
+                <mat-icon class="speedup-icon">trending_up</mat-icon>
+                WASM is <strong>{{getBenchmarkSpeedup()}}x</strong> faster!
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+
+    </mat-tab-group>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="app-footer">
+    <mat-divider></mat-divider>
+    <div class="footer-content">
+      <p>
+        <mat-icon class="footer-icon">lightbulb</mat-icon>
+        <strong>Key Insight:</strong> WebAssembly excels in CPU-intensive tasks with heavy computation. 
+        Use JavaScript for UI and DOM manipulation, use WASM for the computational "engine".
+      </p>
+      <p class="footer-meta">
+        WASM Performance Suite v1.0 | Built with Angular Material 3 & Rust
+      </p>
+    </div>
+  </footer>
+</div>

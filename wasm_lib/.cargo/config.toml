@@ -1,0 +1,11 @@
+[build]
+# Optimize for browser compatibility
+target = "wasm32-unknown-unknown"
+
+[profile.release]
+# Disable LTO for faster builds and better compatibility
+lto = false
+# Optimize for size
+opt-level = "z"
+# Strip symbols for smaller binary
+strip = true
