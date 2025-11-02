@@ -8,11 +8,8 @@ rust-version = "1.91.0"
 [lib]
 crate-type = ["cdylib", "rlib"]
 
-[package.metadata.wasm-pack]
-profile-release = { wasm-opt = ["-O3"] }
-
 [package.metadata.wasm-pack.profile.release]
-wasm-opt = ["-O3"]
+wasm-opt = false
 
 [dependencies]
 wasm-bindgen = { version = "0.2.99", features = ["serde-serialize"] }
