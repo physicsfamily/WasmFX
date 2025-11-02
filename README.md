@@ -6,7 +6,7 @@
 
 This project demonstrates practical WASM integration patterns and serves as a reference implementation for developers working with WebAssembly in production environments.
 
-**[Live Demo](https://wasm.graviton.dev)** | **[GitHub](https://github.com/physicsfamily/WasmFX)**
+**[Live Demo](https://asm.graviton.dev)** | **[GitHub](https://github.com/physicsfamily/WasmFX)**
 
 ---
 
@@ -69,7 +69,7 @@ Open **http://localhost:4200** in your browser to see the interactive benchmark 
 
 ### Live Demo
 
-Try the live demo at: **https://wasm.graviton.dev**
+Try the live demo at: **https://asm.graviton.dev**
 
 ### Troubleshooting
 
